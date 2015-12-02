@@ -1,0 +1,55 @@
+﻿@{ ViewBag.Title = "LogIn"; }
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#loginForm").submit(function (event) {
+                var valid = true;
+
+                var fieldCheck = ["#Username", "#Password"];
+
+                fieldCheck.forEach(function (item) {
+                    if ($(item).val() == "") {
+                        valid = false;
+                        $(item + "Validate").text("* Cannot be left blank");
+                    } else {
+                        $(item + "Validate").text("");
+                    }
+                });
+
+                return valid;
+            });
+        });
+    </script>
+}
+
+<h2>Log In</h2>
+
+@if(ViewBag.ErrorCode != null) {
+    <div class="validationError">
+        @switch((int)ViewBag.ErrorCode) {
+            case 100:
+                @("* Required fields cannot be left blank.")
+                break;
+                
+            case 500:
+                @("* Invalid username/password combination")
+                break;
+        }
+    </div>
+    <br />
+}
+
+@using(Html.BeginForm("LogIn", "Account", FormMethod.Post, new { id = "loginForm" })) {
+    <div class="loginLabel">Username: </div>
+    <div class="floatLeft">@Html.TextBox("Username")</div>
+    <div class="validationError floatLeft" id="UsernameValidate"></div>
+    <div class="clear"></div>
+    <div class="loginLabel">Password:</div>
+    <div class="floatLeft">@Html.Password("Password")</div>
+    <div class="validationError floatLeft" id="PasswordValidate"></div>
+    <div class="clear"></div>
+    <div class="loginLabel">&nbsp;</div>
+    <div class="floatLeft"><input type="submit" value="Login" /></div>
+    <div class="clear"></div>
+}

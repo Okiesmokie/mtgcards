@@ -1,0 +1,60 @@
+﻿table.clvBase {
+    width: 300px;
+    padding: 0px;
+    margin: 0px;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+thead.clvHead {
+    display: block;
+    text-align: left;
+}
+
+thead.clvHead tr {
+    width: 300px;
+    display: inline-block;
+}
+
+thead.clvHead th, tbody.clvBody td {
+    width: 20px;
+}
+
+thead.clvHead th + th, tbody.clvBody td + td {
+    width: 200px;
+}
+
+thead.clvHead th + th + th, tbody.clvBody td + td + td {
+    width: 50px;
+    text-align: center;
+}
+
+tbody.clvBody {
+    background-color: #DEF2F3;
+    height: 300px;
+    display: block;
+    overflow-y: scroll;
+}
+
+tbody.clvBody tr {
+    cursor: pointer;
+    text-indent: 0;
+    display: inline-block;
+    color: #24454C;
+    font-family: Arial;
+    font-size: 15px;
+    font-weight: bold;
+    font-style: normal;
+    text-decoration: none;
+    text-align: left;
+}
+
+tbody.clvBody tr.selected {
+    color: #DEF2F3;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #1093A7), color-stop(1, #24454C));
+    background: -moz-linear-gradient(center top, #1093A7 5%, #24454C 100% );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1093A7', endColorstr='#24454C');
+    background-color: #24454C;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px #24454C;
+}

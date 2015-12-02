@@ -1,0 +1,14 @@
+﻿@{ ViewBag.Title = "Load"; }
+
+<h2>Load a deck</h2>
+<p><b>Supported formats:</b> Cockatrice .cod files</p>
+
+@using(Html.BeginForm("Load", "Deck", FormMethod.Post, new { enctype = "multipart/form-data", id = "loadDeckForm" })) {
+    <div class="loadLabel">File: </div>
+    <div class="floatLeft"><input type="file" name="deckFile" id="deckFile" /></div>
+    <div class="validationError floatLeft" id="FileValidate"></div>
+    <div class="clear"></div>
+    <div class="loadLabel">&nbsp;</div>
+    <div class="floatLeft"><input type="submit" value="Load" /></div>
+    <div class="clear"></div>
+}

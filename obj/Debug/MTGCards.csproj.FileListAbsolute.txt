@@ -1,0 +1,16 @@
+C:\Development\MTGCards\bin\MTGCards.dll
+C:\Development\MTGCards\bin\MTGCards.pdb
+C:\Development\MTGCards\bin\EntityFramework.xml
+C:\Development\MTGCards\obj\Debug\ResolveAssemblyReference.cache
+C:\Development\MTGCards\obj\Debug\MTGCards.dll
+C:\Development\MTGCards\obj\Debug\MTGCards.pdb
+C:\Development\MTGCards\bin\MTGCards.Core.dll
+C:\Development\MTGCards\bin\MTGCards.Core.pdb
+C:\Development\MTGCards\trunk\bin\MTGCards.dll
+C:\Development\MTGCards\trunk\bin\MTGCards.pdb
+C:\Development\MTGCards\trunk\bin\MTGCards.Core.dll
+C:\Development\MTGCards\trunk\bin\MTGCards.Core.pdb
+C:\Development\MTGCards\trunk\obj\Debug\ResolveAssemblyReference.cache
+C:\Development\MTGCards\trunk\obj\Debug\MTGCards.dll
+C:\Development\MTGCards\trunk\obj\Debug\MTGCards.pdb
+C:\Development\MtgCards\obj\Debug\MTGCards.csprojResolveAssemblyReference.cache

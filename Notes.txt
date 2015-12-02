@@ -1,0 +1,3 @@
+﻿Cookies Used:
+	loginHash	- The login hash that matches `LoginHash` in the database if the
+				  user is successfully logged in.

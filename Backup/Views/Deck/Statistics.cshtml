@@ -1,0 +1,68 @@
+﻿@model MTGCards.Models.DeckStatisticsViewModel
+@{ ViewBag.Title = "Statistics"; }
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("tr.cardInfo").mouseover(function () {
+                var cardName = $(this).attr("data-cardname");
+
+                $("#cardOverlayImage").attr("src", "@Url.Content("~/Content/images/loading.gif")");
+
+                $.getJSON('@Url.Action("GetCardInfo", "Deck")/' + cardName, function (data) {
+                    $("#cardOverlayImage").attr("src", data.ImageUri);
+                });
+
+                $("#cardOverlay").css('display', 'block');
+            });
+
+            $("tr.cardInfo").mouseout(function() {
+                $("#cardOverlay").css('display', 'none');
+            });
+
+            $(document).mousemove(function (e) {
+                var overlay = $("#cardOverlay");
+
+                overlay.css('left', e.pageX + 20);
+
+                var yCoord = (e.pageY + 310 > $(document).height() ? e.pageY - 310 : e.pageY);
+                overlay.css('top', yCoord);
+            });
+        });
+    </script>
+}
+
+<div id="cardOverlay" style="position: absolute; display: none;">
+    <img id="cardOverlayImage" src="" alt="" />
+</div>
+
+@foreach(var type in Model.CardTypes) {
+    <table class="statsTable">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th class="center">Mana Cost</th>
+                <th class="center">Set</th>
+            </tr>
+        </thead>
+        <tbody>
+                @foreach(var card in type.CardList) {
+                    <tr class="cardInfo" data-cardname="@card.Name">
+                        <td>@card.Count</td>
+                        <td>@card.Name</td>
+                        <td>@card.Type</td>
+                        <td class="center" style="width: 100px">@card.ManaCost</td>
+                        <td class="center size50">@card.Set</td>
+                    </tr>
+                }
+            
+                <tr style="border-top: 1px solid #24454C">
+                <td>@type.Count</td>
+                <td colspan="4">@Model.Pluralize.Pluralize(type.Type)</td>
+            </tr>
+        </tbody>
+    </table>
+    <br />
+}

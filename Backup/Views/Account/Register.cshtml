@@ -1,0 +1,71 @@
+﻿@{ ViewBag.Title = "Register"; }
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#registerForm").submit(function (event) {
+                var valid = true;
+
+                var fieldCheck = ["#Username", "#Password", "#Email"];
+
+                fieldCheck.forEach(function (item) {
+                    if ($(item).val() == "") {
+                        valid = false;
+                        $(item + "Validate").text("* Cannot be left blank");
+                    } else {
+                        $(item + "Validate").text("");
+                    }
+                });
+
+                var emailAddress = $("#Email").val();
+                if (emailAddress.match(/\b[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/) == null) {
+                    valid = false;
+                    $("#EmailValidate").text("* Not a valid email address");
+                } else {
+                    $("#EmailValidate").text("");
+                }
+
+                return valid;
+            });
+        });
+    </script>
+}
+
+<h2>Register</h2>
+
+@if(ViewBag.ErrorCode != null) {
+    <div class="validationError">
+        @switch((int)ViewBag.ErrorCode) {
+            case 100:
+                @("* Required fields cannot be left blank.")
+                break;
+        }
+    </div>
+    <br />
+}
+
+@using(Html.BeginForm("Register", "Account", FormMethod.Post, new { id = "registerForm" })) {
+    <div class="registerLabel">Username: </div>
+    <div class="floatLeft">@Html.TextBox("Username")</div>
+    <div class="validationError floatLeft" id="UsernameValidate">
+        @if(ViewBag.ErrorCode == 300) {
+            @("* Username already in use")
+        }
+    </div>
+    <div class="clear"></div>
+    <div class="registerLabel">Password:</div>
+    <div class="floatLeft">@Html.Password("Password")</div>
+    <div class="validationError floatLeft" id="PasswordValidate"></div>
+    <div class="clear"></div>
+    <div class="registerLabel">Email Address:</div>
+    <div class="floatLeft">@Html.TextBox("Email")</div>
+    <div class="validationError floatLeft" id="EmailValidate">
+        @if(ViewBag.ErrorCode == 200) {
+            @("* Not a valid email address")
+        }
+    </div>
+    <div class="clear"></div>
+    <div class="registerLabel">&nbsp;</div>
+    <div class="floatLeft"><input type="submit" value="Register" /></div>
+    <div class="clear"></div>
+}

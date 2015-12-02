@@ -1,0 +1,368 @@
+﻿@model MTGCards.Models.DeckCreateViewModel
+@{ ViewBag.Title = "Create"; }
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            FilterCardList();
+
+            /*
+            * Filters
+            */
+            $("#cardNameFilter").change(function () {
+                FilterCardList();
+            });
+
+            $("#filterByName").click(function () {
+                FilterCardList();
+            });
+
+            $("#clearNameFilter").click(function () {
+                $("#cardNameFilter").val('');
+                FilterCardList();
+            });
+
+            $("#showHideFilters").click(function () {
+                var isHidden = ($("#cardFilters").css('display') == "none");
+
+                $("#cardFilters").css('display', (isHidden ? 'block' : 'none'));
+                $(this).val((isHidden ? '-' : '+'));
+            });
+
+            $("#setFilterSelectAll").click(function () {
+                $("#setFilters input[type=checkbox]").each(function(key, element) {
+                    element.checked = true;
+                });
+            });
+
+
+            $("#setFilterSelectNone").click(function () {
+                $("#setFilters input[type=checkbox]").each(function(key, element) {
+                    element.checked = false;
+                });
+            });
+
+            $("#colorFilterSelectAll").click(function () {
+                $("#colorFilters input[type=checkbox]").each(function(key, element) {
+                    element.checked = true;
+                });
+            });
+
+
+            $("#colorFilterSelectNone").click(function () {
+                $("#colorFilters input[type=checkbox]").each(function(key, element) {
+                    element.checked = false;
+                });
+            });
+
+            $("#setFilterButton").click(function () {
+                FilterCardList();
+            });
+
+            /*
+            * Deck Manipulation
+            */
+            /// <summary>
+            /// Adds the selected card to the deck
+            /// </summary>
+            function AddSelectedCardToDeck() {
+                var cardName = $("#selectedCardName").val();
+                var cardColor = $("#selectedCardColor").val();
+                var cardSet = $("#selectedCardSet").val();
+
+                AddCardToList("deckListView", cardName, cardColor, cardSet);
+            }
+
+            /// <summary>
+            /// Removes the selected card from the deck
+            /// </summary>
+            function RemoveSelectedCardFromDeck() {
+                $("#deckListView > tbody > tr.selected").each(function() {
+                    $(this).remove();
+                });
+            }
+
+            $("#addCardToDeck").click(function () {
+                AddSelectedCardToDeck();
+            });
+
+            $("#removeCardFromDeck").click(function () {
+                RemoveSelectedCardFromDeck();
+            });
+
+            $("#saveDeckForm").submit(function () {
+                if ($("#deckName").val() == "") {
+                    alert("Please enter a name for the deck");
+                    return false;
+                }
+
+                $("#deckListView > tbody > tr").each(function (key, element) {
+                    $("<input>").attr({
+                        type: 'hidden',
+                        id: 'cardList',
+                        name: 'cardList',
+                        value: $(this).attr("data-cardname")
+                    }).appendTo($(this));
+                });
+
+                return true;
+            });
+
+            $("#deckListView > tbody > tr").click(function() {
+                CardClicked($(this), "deckListView");
+            });
+        });
+
+        /// <summary>
+        /// Handler for when a card is clicked
+        /// </summary>
+        /// <param name="element">The element that was clicked.</param>
+        /// <param name="parentID">The ID of the ListView the element belongs to.</param>
+        function CardClicked(element, parentID) {
+            var cardName = element.attr("data-cardname");
+            var cardColor = element.attr("data-cardcolor");
+            var cardSet = element.attr("data-cardset");
+
+            if (cardName != null) {
+                $("#selectedCardName").val(cardName);
+                $("#selectedCardColor").val(cardColor);
+                $("#selectedCardSet").val(cardSet);
+
+                $.getJSON('@Url.Action("GetCardInfo", "Deck")/' + cardName, function (data) {
+                    $("#cardImage").attr("src", data.ImageUri);
+                });
+
+                //$("#" + parentID + " > tbody > tr.selected").removeClass("selected");
+                $("table.clvBase > tbody > tr.selected").removeClass("selected");
+                element.addClass("selected");
+            }
+        }
+
+        /// <summary>
+        /// Adds the card to the specified ListView.
+        /// </summary>
+        /// <param name="listViewID">The ID of the ListView to add the card to.</param>
+        /// <param name="cardName">The name of the card to add.</param>
+        /// <param name="cardColor">The color of the card to add.</param>
+        /// <param name="cardSet">The set the card belongs to.</param>
+        function AddCardToList(listViewID, cardName, cardColor, cardSet) {
+            var imageBase = "@Url.Content("~/Content/images/")";
+            var tbody = $("#" + listViewID + " > tbody");
+
+            var tr = $("<tr>");
+            tr.attr("data-cardcolor", cardColor);
+            tr.attr("data-cardset", cardSet);
+            tr.attr("data-cardname", cardName);
+
+            var colorTD = $("<td>");
+            if(cardColor != "") {
+                colorTD.append($("<img>").attr("src", imageBase + "Mana" + cardColor + ".gif"));
+            }
+            var nameTD = $("<td>").text(cardName);
+            var setTD = $("<td>").text(cardSet);
+
+            tr.append(colorTD);
+            tr.append(nameTD);
+            tr.append(setTD);
+
+            tbody.append(tr);
+
+            tr.click(function() {
+                CardClicked($(this), listViewID);
+            });
+        }
+
+        /// <summary>
+        /// Query the server for the list of cards that match
+        /// the filters specified.
+        /// </summary>
+        function FilterCardList() {
+            LoadingStart();
+
+            var filterName = $("#cardNameFilter").val();
+
+            var setList = $("#setFilters input[type=checkbox]:checked").map(function () {
+                return this.value;
+            }).get().join(',');
+
+            var colorList = $("#colorFilters input[type=checkbox]:checked").map(function () {
+                return this.value;
+            }).get().join(',');
+
+            var queryParams = {
+                'nameFilter': filterName,
+                'setFilter': setList,
+                'colorFilter': colorList
+            };
+
+            var params = [];
+            for(var q in queryParams) {
+                if(queryParams[q] != null && queryParams[q] != "") {
+                    params.push(q + "=" + queryParams[q]);
+                }
+            }
+
+            var paramString = params.join('&');
+
+            $.getJSON('@Url.Action("GetFilteredCardList", "Deck")/?' + paramString, function (data) {
+                var tbody = $("#cardListView > tbody");
+                tbody.html("");
+
+                if (data != null) {
+                    $.each(data, function (key, value) {
+                        var parts = value.split('|');
+
+                        AddCardToList("cardListView", parts[2], parts[0], parts[1]);
+                    });
+                }
+
+                LoadingEnd();
+            });
+        }
+
+        function LoadingStart() {
+            $("#loadingScreen").css('display', 'block');
+        }
+
+        function LoadingEnd() {
+            $("#loadingScreen").css('display', 'none');
+        }
+
+    </script>
+}
+
+<div id="loadingScreen"><p>Loading</p></div>
+
+<div id="cardListContainer">
+    <div id="cardListSection">
+        <input type="text" id="cardNameFilter" style="width: 165px;" />
+        <input type="button" id="filerByName" value="Search" />
+        <input type="button" id="clearNameFilter" value="Clear" />
+        <br />
+        <div class="clvContainer">
+            <table id="cardListView" class="clvBase">
+                <thead class="clvHead">
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Name</th>
+                        <th>Set</th>
+                    </tr>
+                </thead>
+                <tbody class="clvBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="cardActionSection">
+        <img src="" alt="" id="cardImage" /><br />
+        <input type="hidden" id="selectedCardName" value="" />
+        <input type="hidden" id="selectedCardColor" value="" />
+        <input type="hidden" id="selectedCardSet" value="" />
+        <input type="button" id="addCardToDeck" value="Add card to deck >>" /><br />
+        <input type="button" id="removeCardFromDeck" value="<< Remove card from deck" /><br />
+    </div>
+
+    <div id="deckListSection">
+        @using(Html.BeginForm("SaveDeck", "Deck", FormMethod.Post, new { id = "saveDeckForm" })) {
+            if(Model.DeckId >= 0) {
+                <input type="hidden" id="deckId" name="deckId" value="@Model.DeckId" />
+            }
+            <label for="deckName">Name:</label>@Html.TextBox("deckName", (Model.DeckId >= 0 ? Model.DeckName : ""), new { style = "width: 160px;" })
+            <input type="submit" value="Save Deck" form="saveDeckForm" />
+            <br />
+            <div class="clvContainer">
+                <table id="deckListView" class="clvBase">
+                    <thead class="clvHead">
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Name</th>
+                            <th>Set</th>
+                        </tr>
+                    </thead>
+                    <tbody class="clvBody">
+                        @foreach(var card in Model.deckCards) {
+                            <tr data-cardname="@card.Name" data-cardcolor="@card.Color" data-cardset="@card.Set">
+                                <td>
+                                    @if(card.Color != null) {
+                                        <img src="@Url.Content(string.Format("~/Content/images/Mana{0}.gif", card.Color))" alt="@card.Color" />
+                                    }
+                                </td>
+                                <td>@card.Name</td>
+                                <td>@card.Set</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="clear"></div>
+</div>
+
+<p>
+    <input type="button" id="showHideFilters" value="+" /> <label for="showHideFilters">Filters:</label>
+    <input type="button" value="Apply Filter" id="setFilterButton" />
+</p>
+
+<div id="cardFilters">
+    <b>Colors:</b>
+    <div class="clear"></div>
+    <div id="colorFilters">
+        @{
+            var cardColors = new[] {
+                new { Symbol = "R", Color = "Red" },
+                new { Symbol = "W", Color = "White" },
+                new { Symbol = "U", Color = "Blue" },
+                new { Symbol = "G", Color = "Green" },
+                new { Symbol = "B", Color = "Black" },
+                new { Symbol = "X", Color = "Colorless" }
+            };
+
+            for(int i = 0; i < cardColors.Length; ++i) {
+                <div class="colorFilterItem">
+                    <input type="checkbox" checked="checked" value="@cardColors[i].Symbol" id="@("colorFilter_" + cardColors[i].Symbol)" />
+                    <label for="@("colorFilter_" + cardColors[i].Symbol)">@cardColors[i].Color</label>
+                </div>
+            
+                if((i + 1) % 3 == 0) {
+                    <div class="clear"></div>
+                }
+            }
+        }
+    </div>
+    <input type="button" value="Select All" id="colorFilterSelectAll" />
+    <input type="button" value="Select None" id="colorFilterSelectNone" />
+    
+    <div class="clear"></div>
+    <br />
+
+    <b>Sets:</b>
+    <div id="setFilters">
+        @{
+            var currentStandard = new string[] { "ISD", "DKA", "AVR", "M13", "RTR", "GTC", "DGM", "M14" };
+
+            for(int i = 0; i < Model.sets.Count; ++i) {
+                var set = Model.sets[i];
+        
+                
+                <div class="setFilterItem">
+                    @if(currentStandard.Contains(set.Name)) {
+                        <input type="checkbox" checked="checked" value="@set.Name" id="@("setfilter_" + set.Name)" />
+                    } else {
+                        <input type="checkbox" value="@set.Name" id="@("setfilter_" + set.Name)" />
+                    }
+                    <label for="@("setfilter_" + set.Name)">@set.LongName</label>
+                </div>
+                    if((i + 1) % 3 == 0) {
+                    <div class="clear"></div>
+                }
+            }
+        }
+
+        <div class="clear"></div>
+    </div>
+    <input type="button" value="Select All" id="setFilterSelectAll" />
+    <input type="button" value="Select None" id="setFilterSelectNone" />
+</div>
